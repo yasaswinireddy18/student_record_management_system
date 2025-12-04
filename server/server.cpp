@@ -1,4 +1,3 @@
-// server/server.cpp (Winsock server)
 #include <iostream>
 #include <fstream>
 #include <vector>
