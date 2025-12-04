@@ -16,7 +16,8 @@ Features:
 PROJECT FOLDER STRUCTURE
 ![Project Folder](https://github.com/yasaswinireddy18/student_record_management_system/blob/main/screenshots/Project%20folder.png?raw=1)
 
-STUDENT DATA:
+
+STUDENT DATA:this is the data considered to execute the project with 5 records of the students.
 Student Data (students.txt)
 ![Student Data](https://raw.githubusercontent.com/yasaswinireddy18/student_record_management_system/refs/heads/main/screenshots/student_data.png)
 
@@ -119,7 +120,11 @@ Server:
 OBSERVED BOTTLENECKS & TRADE-OFFS
 
 • CSV parsing grows linearly with file size
+
 • Sorting is O(n log n)
+
 • Network transmission time varies with Windows TCP buffer behavior
+
 • Server is single-threaded (handles one client at a time)
+
 • No concurrency or async implemented
