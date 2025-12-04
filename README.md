@@ -16,6 +16,9 @@ Features:
 PROJECT FOLDER STRUCTURE
 ![Project Folder](https://github.com/yasaswinireddy18/student_record_management_system/blob/main/screenshots/Project%20folder.png?raw=1)
 
+STUDENT DATA:
+Student Data (students.txt)
+![Student Data](https://raw.githubusercontent.com/yasaswinireddy18/student_record_management_system/refs/heads/main/screenshots/student_data.png)
 
 HOW TO RUN THE PROJECT
 
@@ -39,19 +42,19 @@ Server listening on port 9002...
 
 Client shows the menu:
 
-List all students
+1. List all students
 
-Search by ID
+2. Search by ID
 
-Search by name
+3. Search by name
 
-Sort by grade (descending)
+4. Sort by grade (descending)
 
-Sort by name (ascending)
+5. Sort by name (ascending)
 
-Send data to server and exit
+6. Send data to server and exit
 
-Exit without sending
+7. Exit without sending
 
 SEARCHING FOR STUDENT DETAILS
 
@@ -73,6 +76,15 @@ Client will sort the data, send it to the server, and show performance stats.
 Server will receive data and save it to:
 data/output.csv
 
+## Client Menu and Initial Output
+![Menu and Output](https://raw.githubusercontent.com/yasaswinireddy18/student_record_management_system/refs/heads/main/screenshots/output1.png)
+
+## Continued Output
+![Output Continuation](https://raw.githubusercontent.com/yasaswinireddy18/student_record_management_system/refs/heads/main/screenshots/output2.png)
+
+
+
+
 BUILD COMMANDS (LOCAL COMPILATION)
 
 Build Server:
@@ -92,11 +104,17 @@ Client:
 • Load time: ~0.30 ms
 • Sort time: ~0.01 ms
 • Transmit time: ~3.42 ms
+## Client Performance Output
+![Client Performance](https://raw.githubusercontent.com/yasaswinireddy18/student_record_management_system/refs/heads/main/screenshots/client_performance.png)
+
 
 Server:
 • Records received: 5
 • Receive time: ~34420 ms (local TCP overhead)
 • Save time: ~1.01 ms
+
+## Server Performance Output
+![Server Performance](https://raw.githubusercontent.com/yasaswinireddy18/student_record_management_system/refs/heads/main/screenshots/server%20performance.png)
 
 OBSERVED BOTTLENECKS & TRADE-OFFS
 
