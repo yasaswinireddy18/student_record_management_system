@@ -1,110 +1,98 @@
-#include "StudentManager.h"
-#include <fstream>
-#include <sstream>
 #include <iostream>
-#include <algorithm>
+#include <vector>
+#include <string>
+#include <cstring>
 
-bool StudentManager::loadFromCSV(const std::string &filePath, PerfStats &stats) {
+#include "StudentManager.h"
+#include "student.h"
+#include "Performance.h"
+
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "Ws2_32.lib")
+
+using namespace std;
+
+bool sendStudentsTCP(const vector<Student>& students, const string& host, int port, PerfStats &stats) {
     Timer t;
-    std::ifstream in(filePath);
-    if (!in.is_open()) {
-        std::cerr << "Failed to open " << filePath << "\n";
+    WSADATA wsa;
+    if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
+        cerr << "WSAStartup failed\n";
         return false;
     }
 
-    students.clear();
-    std::string line;
-
-    while (std::getline(in, line)) {
-        if (line.empty()) continue;
-
-        std::stringstream ss(line);
-        std::string token;
-        Student s;
-
-        std::getline(ss, token, ',');
-        s.id = std::stoi(token);
-
-        std::getline(ss, token, ',');
-        s.name = token;
-
-        std::getline(ss, token, ',');
-        s.age = std::stoi(token);
-
-        std::getline(ss, token, ',');
-        s.grade = std::stod(token);
-
-        students.push_back(s);
+    SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sock == INVALID_SOCKET) {
+        cerr << "socket failed\n";
+        WSACleanup();
+        return false;
     }
 
-    stats.recordsProcessed = students.size();
-    stats.loadMs = t.elapsedMs();
-    return true;
-}
+    sockaddr_in serv{};
+    serv.sin_family = AF_INET;
+    serv.sin_port = htons(port);
 
-bool StudentManager::saveToCSV(const std::string &filePath, PerfStats &stats) const {
-    Timer t;
-    std::ofstream out(filePath);
-    if (!out.is_open()) {
-        std::cerr << "Failed to save to " << filePath << "\n";
+    if (inet_pton(AF_INET, host.c_str(), &serv.sin_addr) != 1) {
+        serv.sin_addr.s_addr = inet_addr(host.c_str());
+    }
+
+    if (connect(sock, (sockaddr*)&serv, sizeof(serv)) == SOCKET_ERROR) {
+        cerr << "connect failed, err=" << WSAGetLastError() << "\n";
+        closesocket(sock);
+        WSACleanup();
+        return false;
+    }
+
+    uint32_t cnt = htonl((uint32_t)students.size());
+    if (send(sock, (const char*)&cnt, sizeof(cnt), 0) == SOCKET_ERROR) {
+        cerr << "send count failed\n";
+        closesocket(sock);
+        WSACleanup();
         return false;
     }
 
     for (const auto &s : students) {
-        out << s.toCSV() << "\n";
+        string line = s.toCSV() + "\n";
+        if (send(sock, line.c_str(), (int)line.size(), 0) == SOCKET_ERROR) {
+            cerr << "send line failed\n";
+            closesocket(sock);
+            WSACleanup();
+            return false;
+        }
     }
 
-    stats.saveMs = t.elapsedMs();
+    stats.transmitMs = t.elapsedMs();
+
+    closesocket(sock);
+    WSACleanup();
     return true;
 }
 
-void StudentManager::listAll() const {
-    for (const auto &s : students) {
-        std::cout << s.id << " | " << s.name
-                  << " | age: " << s.age
-                  << " | grade: " << s.grade << "\n";
+int main() {
+    PerfStats stats;
+    StudentManager mgr;
+
+    if (!mgr.loadFromCSV("data\\students.txt", stats)) {
+        cerr << "load failed\n";
+        return 1;
     }
-}
 
-const Student* StudentManager::searchById(int id) const {
-    for (const auto &s : students) {
-        if (s.id == id) return &s;
+    cout << "Loaded " << mgr.size() << " students\n";
+    mgr.sortByGrade(stats);
+    cout << "After sort by grade:\n";
+    mgr.listAll();
+
+    if (!sendStudentsTCP(mgr.getAll(), "127.0.0.1", 9002, stats)) {
+        cerr << "send failed\n";
+        return 1;
     }
-    return nullptr;
-}
 
-std::vector<Student> StudentManager::searchByName(const std::string &name) const {
-    std::vector<Student> result;
-    for (const auto &s : students) {
-        if (s.name == name) result.push_back(s);
-    }
-    return result;
-}
+    cout << "\n=== Client Perf ===\n";
+    cout << "records: " << stats.recordsProcessed << "\n";
+    cout << "load ms: " << stats.loadMs << "\n";
+    cout << "sort ms: " << stats.sortMs << "\n";
+    cout << "transmit ms: " << stats.transmitMs << "\n";
 
-void StudentManager::sortById(PerfStats &stats) {
-    Timer t;
-    std::sort(students.begin(), students.end(),
-        [](const Student &a, const Student &b) {
-            return a.id < b.id;
-        });
-    stats.sortMs = t.elapsedMs();
-}
-
-void StudentManager::sortByGrade(PerfStats &stats) {
-    Timer t;
-    std::sort(students.begin(), students.end(),
-        [](const Student &a, const Student &b) {
-            return a.grade > b.grade;
-        });
-    stats.sortMs = t.elapsedMs();
-}
-
-void StudentManager::sortByName(PerfStats &stats) {
-    Timer t;
-    std::sort(students.begin(), students.end(),
-        [](const Student &a, const Student &b) {
-            return a.name < b.name;
-        });
-    stats.sortMs = t.elapsedMs();
+    return 0;
 }
 
