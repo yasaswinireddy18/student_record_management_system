@@ -4,35 +4,37 @@
 #include <iostream>
 #include <algorithm>
 
-bool StudentManager::loadFromCSV(const std::string &filePath, PerfStats &stats) {
+using namespace std;
+
+bool StudentManager::loadFromCSV(const string &filePath, PerfStats &stats) {
     Timer t;
-    std::ifstream in(filePath);
+    ifstream in(filePath);
     if (!in.is_open()) {
-        std::cerr << "Failed to open " << filePath << "\n";
+        cerr << "Failed to open " << filePath << "\n";
         return false;
     }
 
     students.clear();
-    std::string line;
+    string line;
 
-    while (std::getline(in, line)) {
+    while (getline(in, line)) {
         if (line.empty()) continue;
 
-        std::stringstream ss(line);
-        std::string token;
+        stringstream ss(line);
+        string token;
         Student s;
 
-        std::getline(ss, token, ',');
-        s.id = std::stoi(token);
+        getline(ss, token, ',');
+        s.id = stoi(token);
 
-        std::getline(ss, token, ',');
+        getline(ss, token, ',');
         s.name = token;
 
-        std::getline(ss, token, ',');
-        s.age = std::stoi(token);
+        getline(ss, token, ',');
+        s.age = stoi(token);
 
-        std::getline(ss, token, ',');
-        s.grade = std::stod(token);
+        getline(ss, token, ',');
+        s.grade = stod(token);
 
         students.push_back(s);
     }
@@ -42,11 +44,11 @@ bool StudentManager::loadFromCSV(const std::string &filePath, PerfStats &stats) 
     return true;
 }
 
-bool StudentManager::saveToCSV(const std::string &filePath, PerfStats &stats) const {
+bool StudentManager::saveToCSV(const string &filePath, PerfStats &stats) const {
     Timer t;
-    std::ofstream out(filePath);
+    ofstream out(filePath);
     if (!out.is_open()) {
-        std::cerr << "Failed to save to " << filePath << "\n";
+        cerr << "Failed to save to " << filePath << "\n";
         return false;
     }
 
@@ -60,9 +62,9 @@ bool StudentManager::saveToCSV(const std::string &filePath, PerfStats &stats) co
 
 void StudentManager::listAll() const {
     for (const auto &s : students) {
-        std::cout << s.id << " | " << s.name
-                  << " | age: " << s.age
-                  << " | grade: " << s.grade << "\n";
+        cout << s.id << " | " << s.name
+             << " | age: " << s.age
+             << " | grade: " << s.grade << "\n";
     }
 }
 
@@ -73,8 +75,8 @@ const Student* StudentManager::searchById(int id) const {
     return nullptr;
 }
 
-std::vector<Student> StudentManager::searchByName(const std::string &name) const {
-    std::vector<Student> result;
+vector<Student> StudentManager::searchByName(const string &name) const {
+    vector<Student> result;
     for (const auto &s : students) {
         if (s.name == name) result.push_back(s);
     }
@@ -83,7 +85,7 @@ std::vector<Student> StudentManager::searchByName(const std::string &name) const
 
 void StudentManager::sortById(PerfStats &stats) {
     Timer t;
-    std::sort(students.begin(), students.end(),
+    sort(students.begin(), students.end(),
         [](const Student &a, const Student &b) {
             return a.id < b.id;
         });
@@ -92,7 +94,7 @@ void StudentManager::sortById(PerfStats &stats) {
 
 void StudentManager::sortByGrade(PerfStats &stats) {
     Timer t;
-    std::sort(students.begin(), students.end(),
+    sort(students.begin(), students.end(),
         [](const Student &a, const Student &b) {
             return a.grade > b.grade;
         });
@@ -101,7 +103,7 @@ void StudentManager::sortByGrade(PerfStats &stats) {
 
 void StudentManager::sortByName(PerfStats &stats) {
     Timer t;
-    std::sort(students.begin(), students.end(),
+    sort(students.begin(), students.end(),
         [](const Student &a, const Student &b) {
             return a.name < b.name;
         });
